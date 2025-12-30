@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title> 小羊存錢計畫</title>
+    <title>RO 冒險者金庫</title>
 
     <link rel="apple-touch-icon" href="https://i.imgur.com/8N6G5X0.png">
     <link rel="icon" type="image/png" href="https://i.imgur.com/8N6G5X0.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="小羊存錢計畫">
+    <meta name="apple-mobile-web-app-title" content="RO金庫">
 
     <style>
         :root {
@@ -19,57 +19,61 @@
         }
 
         body {
-            /* 使用經典 RO 藍色漸層背景 */
             background: linear-gradient(180deg, #6a9edb 0%, #ffffff 100%);
             font-family: 'Tahoma', 'Arial', sans-serif;
             display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; overflow: hidden;
+            min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box;
         }
 
         .ro-window {
-            width: 85%; max-width: 400px;
+            width: 100%; max-width: 400px;
             background: rgba(255, 255, 255, 0.9);
             border: 2px solid #89a7d3;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 30px; position: relative;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            padding: 35px; position: relative;
         }
 
-        /* 稱號與稱職 */
-        #job-title { font-size: 14px; color: #555; font-weight: bold; display: block; text-align: center; }
-        #job-name { margin: 5px 0 20px 0; font-size: 32px; color: var(--ro-blue); font-weight: 900; text-align: center; }
+        /* 職業稱號區 */
+        .status-box { text-align: center; margin-bottom: 25px; }
+        #job-title { font-size: 14px; color: #666; font-weight: bold; }
+        #job-name { margin: 8px 0; font-size: 36px; color: var(--ro-blue); font-weight: 900; }
 
         /* 進度條 (HP 條樣式) */
-        .bar-container { background: #eee; height: 15px; border-radius: 10px; border: 1px solid #ccc; overflow: hidden; margin-bottom: 25px; }
-        .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4facfe, #00f2fe); transition: 1s ease-in-out; }
+        .bar-container { background: #e0e0e0; height: 18px; border-radius: 10px; border: 1px solid #ccc; overflow: hidden; margin-bottom: 30px; }
+        .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4facfe, #00f2fe); transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
 
+        /* 輸入與按鈕 */
         input {
-            width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px;
-            font-size: 22px; font-weight: bold; text-align: center; box-sizing: border-box;
+            width: 100%; padding: 18px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 15px;
+            font-size: 26px; font-weight: bold; text-align: center; box-sizing: border-box; outline: none;
         }
 
-        .cat-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 20px; }
-        .cat-btn { padding: 8px 0; font-size: 11px; border: 1px solid #ccc; border-radius: 5px; background: #f9f9f9; cursor: pointer; }
-        .cat-btn.active { background: var(--ro-blue); color: white; border-color: var(--ro-blue); }
+        .cat-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 25px; }
+        .cat-btn { padding: 10px 0; font-size: 13px; border: 1px solid #ccc; border-radius: 10px; background: white; cursor: pointer; transition: 0.2s; font-weight: bold; color: #555; }
+        .cat-btn.active { background: var(--ro-blue); color: white; border-color: var(--ro-blue); box-shadow: 0 4px 10px rgba(61, 108, 185, 0.3); }
 
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn { padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
-        .btn-in { background: var(--ro-blue); }
-        .btn-out { background: var(--ro-red); }
+        .btn { padding: 18px; border: none; border-radius: 15px; color: white; font-weight: bold; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        .btn-in { background: var(--ro-blue); box-shadow: 0 5px 15px rgba(61, 108, 185, 0.2); }
+        .btn-out { background: var(--ro-red); box-shadow: 0 5px 15px rgba(204, 51, 51, 0.2); }
 
-        .history { margin-top: 20px; height: 100px; overflow-y: auto; font-size: 12px; border-top: 1px solid #eee; padding-top: 10px; }
-        .total-box { text-align: right; margin-top: 20px; font-size: 40px; font-weight: 900; color: var(--zeny-gold); }
+        /* 歷史紀錄與總額 */
+        .history { margin-top: 25px; height: 120px; overflow-y: auto; font-size: 13px; border-top: 1px solid #eee; padding-top: 15px; }
+        .total-display { text-align: right; margin-top: 25px; font-size: 50px; font-weight: 900; color: var(--zeny-gold); }
     </style>
 </head>
 <body>
 
 <div class="ro-window">
-    <div id="job-title">[ 冒險者 ]</div>
-    <div id="job-name">初心者</div>
-    
+    <div class="status-box">
+        <span id="job-title">[ 冒險準備中 ]</span>
+        <h2 id="job-name">初心者</h2>
+    </div>
+
     <div class="bar-container"><div id="bar" class="bar-fill"></div></div>
 
-    <input type="number" id="amt" placeholder="輸入 Zeny" inputmode="numeric">
+    <input type="number" id="main-input" placeholder="0" inputmode="numeric">
 
     <div class="cat-group">
         <button class="cat-btn active" onclick="setCat('💊 補給', this)">補給</button>
@@ -79,58 +83,79 @@
     </div>
 
     <div class="btn-group">
-        <button class="btn btn-in" onclick="act('in')">存入</button>
-        <button class="btn btn-out" onclick="act('out')">支出</button>
+        <button class="btn btn-in" onclick="handle('in')">存入</button>
+        <button class="btn btn-out" onclick="handle('out')">支出</button>
     </div>
 
-    <div id="logs" class="history"></div>
-    <div class="total-box"><span id="total">0</span> <small style="font-size:15px; color:#999;">Z</small></div>
+    <div id="history-box" class="history"></div>
+
+    <div class="total-display">
+        <span id="total-val">0</span> <small style="font-size: 18px; color:#888;">Z</small>
+    </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('ro_v3')) || { total: 0, logs: [], target: 10000, cat: '💊 補給' };
-    
-    function setCat(c, btn) {
-        db.cat = c;
+    // 儲存邏輯 (使用 v4 避免與舊版本衝突)
+    let data = JSON.parse(localStorage.getItem('ro_final_v4')) || { 
+        total: 0, target: 50000, logs: [], currentCat: '💊 補給' 
+    };
+
+    const levels = [
+        { threshold: 0,    title: "[ 普隆德拉新兵 ]", name: "初心者" },
+        { threshold: 0.2,  title: "[ 冒險家 ]", name: "劍士" },
+        { threshold: 0.5,  title: "[ 富有的商人 ]", name: "商人" },
+        { threshold: 0.8,  title: "[ 影子金庫負責人 ]", name: "刺客" },
+        { threshold: 1.0,  title: "[ 盧恩米德加茲英雄 ]", name: "傳奇英雄" }
+    ];
+
+    function setCat(cat, btn) {
+        data.currentCat = cat;
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
 
-    function act(type) {
-        const val = parseInt(document.getElementById('amt').value);
-        if (!val) return;
-        if (type === 'out' && db.total < val) return alert("Zeny不足！");
+    function handle(type) {
+        const input = document.getElementById('main-input');
+        const amt = parseInt(input.value);
+        if (!amt || amt <= 0) return;
+
+        if (type === 'out') {
+            if (data.total < amt) return alert("Zeny 不足！");
+            data.total -= amt;
+        } else {
+            data.total += amt;
+        }
+
+        const now = new Date();
+        const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
         
-        db.total += (type === 'in' ? val : -val);
-        db.logs.unshift({ t: new Date().toLocaleTimeString(), a: val, type, c: type==='in'?'💰 存入':db.cat });
-        if(db.logs.length > 20) db.logs.pop();
+        data.logs.unshift({ 
+            time, amt, type, 
+            cat: type === 'in' ? '💰 存錢' : data.currentCat 
+        });
         
-        document.getElementById('amt').value = '';
+        if (data.logs.length > 20) data.logs.pop();
+        input.value = '';
         save();
     }
 
     function save() {
-        localStorage.setItem('ro_v3', JSON.stringify(db));
+        localStorage.setItem('ro_final_v4', JSON.stringify(data));
         render();
     }
 
     function render() {
-        document.getElementById('total').innerText = db.total.toLocaleString();
-        const p = Math.min((db.total / db.target) * 100, 100);
-        document.getElementById('bar').style.width = p + '%';
-        
-        const lv = p < 20 ? '初心者' : p < 50 ? '二轉職業' : p < 90 ? '進階二轉' : '發光領主';
-        document.getElementById('job-name').innerText = lv;
+        document.getElementById('total-val').innerText = data.total.toLocaleString();
+        const p = Math.min(data.total / data.target, 1);
+        document.getElementById('bar').style.width = (p * 100) + '%';
 
-        document.getElementById('logs').innerHTML = db.logs.map(l => `
-            <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dotted #ccc;">
-                <span>${l.c}</span>
-                <span style="color:${l.type==='in'?'green':'red'}">${l.type==='in'?'+':'-'}${l.a}</span>
-            </div>
-        `).join('');
-    }
+        let cur = levels[0];
+        levels.forEach(l => { if (p >= l.threshold) cur = l; });
+        document.getElementById('job-title').innerText = cur.title;
+        document.getElementById('job-name').innerText = cur.name;
 
-    render();
-</script>
-</body>
-</html>
+        document.getElementById('history-box').innerHTML = data.logs.map(l => `
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #eee;">
+                <span><small style="color:#999;">${l.time}</small> ${l.cat}</span>
+                <span style="color:${l.type==='in'?'#2d8a2d':'#cc3333'}; font-weight:bold;">
+                    ${l.type==='in'?'+':'-'}${l.
