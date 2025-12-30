@@ -18,15 +18,14 @@
             --ro-red: #cc3333;
             --zeny-gold: #ff8c00;
         }
-
-        /* 這裡保留你原本所有的 CSS 樣式 ... */
-        body {
+ body {
             background: linear-gradient(135deg, #ffffff 0%, #e9eff5 100%);
             font-family: 'Tahoma', 'Arial', '微軟正黑體', sans-serif;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; padding: 20px;
         }
 
+        /* 視窗主體 - 比例放大並增加呼吸感 */
         .ro-window {
             width: 100%; max-width: 460px;
             background: var(--ro-ui-bg);
@@ -37,6 +36,7 @@
             padding: 45px; position: relative;
         }
 
+        /* 系統設定面板 */
         .settings-panel {
             display: none; background: white;
             position: absolute; top: 80px; left: 20px; right: 20px;
@@ -51,13 +51,16 @@
         }
         .settings-btn:hover { opacity: 1; transform: rotate(45deg); }
 
+        /* 狀態文字區 */
         .status-section { text-align: center; margin-bottom: 30px; }
         #job-title { font-size: 16px; font-weight: bold; color: #666; letter-spacing: 1px; display: block; height: 20px; }
         #job-name { margin: 10px 0; font-size: 38px; color: var(--ro-blue); font-weight: 900; text-shadow: 1px 1px 0px white; }
         
+        /* 進度條 */
         .bar-container { background: rgba(0,0,0,0.1); height: 22px; border-radius: 11px; overflow: hidden; margin-bottom: 35px;}
         .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4facfe, #00f2fe); transition: 1.5s cubic-bezier(0.22, 1, 0.36, 1); }
 
+        /* 操作區 */
         input {
             width: 100%; padding: 20px; margin-bottom: 15px;
             border: 2px solid rgba(0,0,0,0.06); border-radius: 15px;
@@ -75,7 +78,10 @@
         .btn { padding: 20px; border: none; border-radius: 18px; color: white; font-weight: bold; font-size: 22px; cursor: pointer; transition: 0.3s; }
         .btn-in { background: var(--ro-blue); box-shadow: 0 8px 20px rgba(61, 108, 185, 0.2); }
         .btn-out { background: var(--ro-red); box-shadow: 0 8px 20px rgba(204, 51, 51, 0.2); }
+        .btn:hover { transform: translateY(-4px); filter: brightness(1.1); }
+        .btn:active { transform: translateY(-1px); }
 
+        /* 統計與歷史 */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 35px; border-top: 2px solid #f0f0f0; padding-top: 25px; }
         .stat-card { background: rgba(255,255,255,0.6); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(0,0,0,0.02); }
 
@@ -149,7 +155,6 @@
 </div>
 
 <script>
-    // 這裡保留你原本所有的 JavaScript 邏輯 ...
     let data = { 
         total: 0, 
         target: 10000, 
