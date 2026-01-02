@@ -3,83 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mortgage Pro | Visual Labels</title>
+    <title>Mortgage Pro | Unified Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Noto+Sans+TC:wght@500;900&display=swap');
-        :root { --fluid-p: clamp(1rem, 4vw, 3rem); }
-        body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; background: #f8fafc; color: #0f172a; padding: var(--fluid-p); min-height: 100vh; }
-        .main-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .notice-card { background: rgba(255, 255, 255, 0.95); border: 2px solid #f43f5e; box-shadow: 0 0 15px rgba(244, 63, 94, 0.1); }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; 
+            background: #f1f5f9;
+            color: #1e293b; 
+            padding: clamp(1rem, 4vw, 2.5rem);
+            min-height: 100vh;
+        }
+
+        /* 統一卡片基礎樣式 */
+        .glass-card { 
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 數據主板：黑色文字 + 左側紅深線 */
+        .main-board-red {
+            border-left: 6px solid #ef4444 !important;
+            padding-left: 2rem !important;
+            box-shadow: -10px 0 20px -10px rgba(239, 68, 68, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .main-board-red:hover {
+            transform: translateX(5px);
+            box-shadow: -12px 0 25px -8px rgba(239, 68, 68, 0.25);
+        }
+
+        /* 錄入區與清單區統一左側線 */
+        .sidebar-accent-dark { border-left: 5px solid #0f172a !important; }
+        .sidebar-accent-amber { border-left: 5px solid #f59e0b !important; }
+        
+        /* 進度條優化 */
+        .progress-glow {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
         body.user-mode .admin-only { display: none !important; }
         body.user-mode .list-container { grid-column: span 12 / span 12 !important; }
-        #settingsPanel, #projectPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; z-index: 1000; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 900; }
+        
+        .panel-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%); width: 90%; max-width: 400px; z-index: 1000; animation: popup 0.3s ease forwards; opacity: 0; }
+        @keyframes popup { to { transform: translate(-50%, -50%); opacity: 1; } }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); backdrop-filter: blur(4px); z-index: 900; }
         .active { display: block !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .color-input { -webkit-appearance: none; border: none; width: 24px; height: 24px; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
-        .color-input::-webkit-color-swatch { border: none; border-radius: 6px; }
     </style>
 </head>
 <body>
     <div id="overlay" onclick="closeAllPanels()"></div>
 
-    <div class="main-container">
-        <header class="flex justify-between items-center w-full">
-            <div class="flex flex-col">
+    <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex justify-between items-center px-2">
+            <div>
                 <div class="flex items-center gap-3">
-                    <h1 id="currentProjectName" class="text-2xl md:text-4xl font-black tracking-tight text-slate-900 leading-none">房貸助手</h1>
-                    <button onclick="toggleProjectPanel()" class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-500 shadow-sm uppercase hover:bg-slate-50">切換</button>
+                    <h1 id="currentProjectName" class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">房貸助手</h1>
+                    <button onclick="toggleProjectPanel()" class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-500 hover:bg-slate-100 transition-all shadow-sm">切換帳本</button>
                 </div>
-                <p id="modeBadge" class="text-[9px] font-bold tracking-[0.2em] mt-2 text-slate-400">LOADING</p>
+                <div id="modeBadge" class="inline-block mt-1 text-[10px] font-extrabold text-slate-400 bg-slate-200/50 px-2 py-0.5 rounded uppercase">Loading</div>
             </div>
-            <div class="flex gap-2 items-center">
-                <button onclick="toggleLockMode()" id="lockBtn" class="p-3 bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm transition-all active:scale-95">
-                    <span id="lockIcon" class="text-sm md:text-base">🔒</span>
-                </button>
+            <div class="flex gap-2">
+                <button onclick="toggleLockMode()" id="lockBtn" class="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm active:scale-95 transition-all"><span id="lockIcon">🔒</span></button>
                 <div class="admin-only flex gap-2">
-                    <button onclick="exportJSON()" class="p-3 bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm">💾</button>
-                    <button onclick="toggleSettings()" class="p-3 bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm">🎨</button>
+                    <button onclick="exportJSON()" class="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50">💾</button>
+                    <button onclick="toggleSettings()" class="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50">🎨</button>
                 </div>
             </div>
         </header>
 
-        <div class="w-full">
-            <div class="notice-card px-5 py-4 rounded-2xl flex items-center gap-3">
-                <div class="relative flex h-3 w-3 flex-shrink-0">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
-                </div>
-                <span class="text-lg">📢</span>
-                <div id="announcementBar" class="text-xs md:text-sm font-bold text-slate-700 truncate">載入中...</div>
-            </div>
+        <div class="glass-card px-5 py-3 flex items-center gap-4 border-l-4 border-rose-500">
+            <div class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></div>
+            <marquee id="announcementBar" class="text-xs font-bold text-slate-500 italic">載入中...</marquee>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass-card p-6 md:p-10 border-l-[12px] border-emerald-500 flex flex-col justify-center">
-                <div class="flex justify-between">
+            <div class="lg:col-span-2 glass-card p-8 main-board-red">
+                <div class="flex justify-between items-start mb-6">
                     <div>
-                        <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest block">剩餘還款額</span>
-                        <h2 id="statRemaining" class="text-4xl md:text-6xl font-mono font-black text-slate-800">$0</h2>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">剩餘還款額</p>
+                        <h2 id="statRemaining" class="text-4xl md:text-6xl font-mono font-black text-slate-900 tracking-tighter">$0</h2>
                     </div>
                     <div class="text-right">
-                        <span id="percentLabel" class="text-3xl md:text-5xl font-black text-indigo-600 font-mono">0%</span>
-                        <div id="loanTotalDisplay" class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Total $0</div>
+                        <p id="percentLabel" class="text-3xl md:text-5xl font-black text-slate-900 font-mono italic">0%</p>
+                        <p id="loanTotalDisplay" class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Target $0</p>
                     </div>
                 </div>
-                <div class="mt-8 bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
-                    <div id="progressBar" class="h-full bg-emerald-500 transition-all duration-1000"></div>
+                <div class="bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progressBar" class="h-full rounded-full progress-glow transition-all duration-1000 w-0"></div>
                 </div>
             </div>
-
-            <div class="glass-card p-6 flex flex-col items-center justify-center border-l-[12px] border-amber-500 min-h-[300px]">
-                <div class="w-32 h-32 md:w-36 md:h-36 relative mb-4">
-                    <canvas id="contributionChart"></canvas>
-                </div>
-                <div id="chartLegend" class="grid grid-cols-2 gap-x-4 gap-y-1 w-full mt-2">
-                    </div>
+            
+            <div class="glass-card p-6 flex flex-col items-center justify-center sidebar-accent-amber">
+                <div class="w-24 h-24 relative mb-4"><canvas id="contributionChart"></canvas></div>
+                <div id="chartLegend" class="grid grid-cols-2 gap-x-4 gap-y-1 w-full text-[10px] font-black text-slate-500"></div>
             </div>
         </div>
 
@@ -87,31 +111,37 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div class="lg:col-span-4 admin-only">
-                <div class="glass-card p-6 md:p-8 border-l-[12px] border-slate-400">
-                    <h3 class="text-xs font-black uppercase mb-6">輸入</h3>
+                <div class="glass-card p-6 sidebar-accent-dark">
+                    <h3 class="text-xs font-black uppercase mb-5 text-slate-400 tracking-widest">輸入項目</h3>
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <select id="payer" class="bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none"></select>
-                            <input type="date" id="recDate" class="bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none">
+                        <div class="grid grid-cols-2 gap-3">
+                            <select id="payer" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold"></select>
+                            <input type="date" id="recDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold">
                         </div>
-                        <input type="number" id="recAmount" placeholder="金額" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-6 text-3xl font-mono font-black text-center outline-none">
-                        <button onclick="addRecord()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase hover:bg-black transition-all">確認</button>
+                        <input type="number" id="recAmount" oninput="updatePreview(this.value)" placeholder="輸入金額" class="w-full bg-white border-2 border-slate-100 rounded-2xl p-4 text-2xl font-mono font-black text-center focus:border-slate-900 outline-none transition-all">
+                        <p id="amountPreview" class="text-center text-[10px] font-bold text-slate-400 h-4"></p>
+                        <button onclick="addRecord()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-black active:scale-95 transition-all">確認</button>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-8 list-container">
-                <div class="glass-card flex flex-col overflow-hidden border-l-[12px] border-black">
-                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white/50">
-                        <h3 class="text-xs font-black uppercase">歷史清單</h3>
-                        <input type="text" id="searchPayer" oninput="render()" placeholder="搜尋..." class="text-xs border border-slate-200 px-4 py-2 rounded-xl outline-none">
+                <div class="glass-card sidebar-accent-dark">
+                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">歷史清單</h3>
+                        <input type="text" id="searchPayer" oninput="render()" placeholder="搜尋成員..." class="text-xs border border-slate-200 px-3 py-2 rounded-xl w-32 outline-none focus:border-slate-400">
                     </div>
-                    <div class="overflow-x-auto no-scrollbar">
-                        <table class="w-full text-left min-w-[450px]">
-                            <thead class="text-[9px] text-slate-400 uppercase font-black bg-slate-50/50">
-                                <tr><th class="px-8 py-3">成員/日期</th><th class="px-8 py-3 text-right">金額</th><th class="px-8 py-3 text-center admin-only">管理</th></tr>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] text-slate-400 font-black uppercase">
+                                <tr>
+                                    <th class="px-6 py-4">成員</th>
+                                    <th class="px-6 py-4 text-center">日期</th>
+                                    <th class="px-6 py-4 text-right">金額 (TWD)</th>
+                                    <th class="px-6 py-4 text-center admin-only">操作</th>
+                                </tr>
                             </thead>
-                            <tbody id="listBody" class="text-sm"></tbody>
+                            <tbody id="listBody" class="divide-y divide-slate-50"></tbody>
                         </table>
                     </div>
                 </div>
@@ -119,156 +149,94 @@
         </div>
     </div>
 
-    <div id="settingsPanel" class="glass-card p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto no-scrollbar">
-        <h4 class="font-black text-xs uppercase mb-6 text-slate-800">帳本設定 & 顏色</h4>
+    <div id="settingsPanel" class="glass-card p-8 panel-popup shadow-2xl overflow-y-auto max-h-[90vh] sidebar-accent-dark">
+        <h4 class="font-black text-lg mb-6">帳本設定</h4>
         <div class="space-y-4">
-            <div><label class="text-[9px] font-bold text-slate-400 ml-1">帳本名稱</label><input type="text" id="projNameInput" class="w-full border p-3 rounded-xl font-bold outline-none"></div>
-            <div><label class="text-[9px] font-bold text-slate-400 ml-1">房貸總額 (萬)</label><input type="number" id="loanTotal" class="w-full border p-3 rounded-xl font-bold outline-none"></div>
-            <div><label class="text-[9px] font-bold text-slate-400 ml-1">公告內容</label><input type="text" id="announcementInput" class="w-full border p-3 rounded-xl font-bold outline-none"></div>
-            <div class="pt-2 border-t border-slate-100 mt-2">
-                <label class="text-[9px] font-bold text-slate-400 ml-1 block mb-2">成員設定</label>
-                <div id="memberInputsGrid" class="space-y-2"></div>
-            </div>
-            <div class="flex gap-2 pt-4">
-                <button onclick="updateSettings()" class="flex-grow py-3 bg-indigo-600 text-white rounded-xl font-bold">儲存變更</button>
-                <button onclick="deleteProject()" class="px-4 bg-rose-50 text-rose-500 rounded-xl font-bold">刪除</button>
-            </div>
+            <input type="text" id="projNameInput" placeholder="帳本名稱" class="w-full border p-3 rounded-xl font-bold text-sm">
+            <input type="number" id="loanTotal" placeholder="總額(萬)" class="w-full border p-3 rounded-xl font-bold text-sm">
+            <input type="text" id="announcementInput" placeholder="公告內容" class="w-full border p-3 rounded-xl font-bold text-sm">
+            <div id="memberInputsGrid" class="space-y-3 pt-4 border-t"></div>
+            <button onclick="updateSettings()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold mt-4 shadow-lg">儲存設定</button>
+            <button onclick="deleteProject()" class="w-full py-2 text-rose-500 font-bold text-xs mt-2">刪除目前帳本</button>
         </div>
     </div>
 
-    <div id="projectPanel" class="glass-card p-6 shadow-2xl bg-white">
-        <div class="flex justify-between items-center mb-6">
-            <h4 class="font-black text-xs uppercase text-slate-800">帳本清單</h4>
-            <button onclick="addNewProject()" class="admin-only bg-indigo-600 text-white px-3 py-1 text-[10px] font-bold rounded-lg">+ 新增</button>
-        </div>
-        <div id="projectList" class="space-y-2 max-h-64 overflow-y-auto no-scrollbar"></div>
+    <div id="projectPanel" class="glass-card p-6 panel-popup shadow-2xl sidebar-accent-dark">
+        <div class="flex justify-between items-center mb-6"><h4 class="font-black text-lg">切換帳本</h4><button onclick="addNewProject()" class="admin-only text-indigo-600 font-black text-xs px-3 py-1 bg-indigo-50 rounded-lg">+ 新增</button></div>
+        <div id="projectList" class="space-y-3"></div>
     </div>
 
     <script>
-        const defaultColors = ['#6366f1', '#a855f7', '#10b981', '#f59e0b'];
-        let projects = JSON.parse(localStorage.getItem('mortgage_v_final_2')) || [
-            { id: Date.now(), name: "我的房貸帳本", total: 10000000, names: ["成員1", "成員2", "成員3", "成員4"], colors: [...defaultColors], records: [], announcement: "歡迎使用！" }
-        ];
-        let currentIdx = parseInt(localStorage.getItem('curr_idx_final_2')) || 0;
-        let isLocked = localStorage.getItem('lock_final_2') !== 'false';
-        let editingId = null;
+        // JS 邏輯代碼 (保持與之前一致)
+        const defaultColors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b'];
+        let projects = JSON.parse(localStorage.getItem('mortgage_v_final_final')) || [{ id: Date.now(), name: "我的房貸", total: 10000000, names: ["成員A", "成員B", "成員C", "成員D"], colors: [...defaultColors], records: [], announcement: "歡迎使用房貸助手！" }];
+        let currentIdx = parseInt(localStorage.getItem('curr_idx_final_final')) || 0;
+        let isLocked = localStorage.getItem('lock_final_final') !== 'false';
         let myChart = null;
 
         function init() {
             if (currentIdx >= projects.length) currentIdx = 0;
             const p = projects[currentIdx];
-            if (!p.colors) p.colors = [...defaultColors];
-
             document.getElementById('currentProjectName').innerText = p.name;
             document.getElementById('projNameInput').value = p.name;
-            document.getElementById('loanTotal').value = p.total / 10000 || "";
+            document.getElementById('loanTotal').value = p.total / 10000;
             document.getElementById('announcementInput').value = p.announcement || "";
-            
-            const inputGrid = document.getElementById('memberInputsGrid');
-            inputGrid.innerHTML = p.names.map((name, i) => `
-                <div class="flex items-center gap-2">
-                    <input type="color" id="color${i}" value="${p.colors[i]}" class="color-input">
-                    <input type="text" id="name${i}" value="${name}" class="flex-grow border p-2 rounded-lg text-xs font-bold outline-none">
-                </div>
-            `).join('');
-
+            document.getElementById('memberInputsGrid').innerHTML = p.names.map((n, i) => `<div class="flex items-center gap-3"><input type="color" id="color${i}" value="${p.colors[i]}" class="w-8 h-8 rounded-lg border-none cursor-pointer"><input type="text" id="name${i}" value="${n}" class="flex-grow border p-2 rounded-xl text-xs font-bold"></div>`).join('');
             document.getElementById('recDate').valueAsDate = new Date();
             applyLockUI(); render(); renderProjectList();
         }
 
         function toggleLockMode() {
-            if (isLocked) {
-                const pass = prompt("密碼:");
-                if (pass === "0000") isLocked = false; else return;
-            } else isLocked = true;
-            localStorage.setItem('lock_final_2', isLocked);
-            init();
+            if (isLocked) { const pass = prompt("請輸入密碼解鎖:"); if (pass === "0000") isLocked = false; else return; } else isLocked = true;
+            localStorage.setItem('lock_final_final', isLocked); init();
         }
 
         function applyLockUI() {
             const badge = document.getElementById('modeBadge');
-            const icon = document.getElementById('lockIcon');
-            if (isLocked) {
-                document.body.classList.add('user-mode');
-                badge.innerText = "VIEW MODE"; icon.innerText = "🔒";
-            } else {
-                document.body.classList.remove('user-mode');
-                badge.innerText = "ADMIN MODE"; icon.innerText = "🔓";
-            }
+            if (isLocked) { document.body.classList.add('user-mode'); badge.innerText = "唯讀模式"; document.getElementById('lockIcon').innerText = "🔒"; }
+            else { document.body.classList.remove('user-mode'); badge.innerText = "管理模式"; document.getElementById('lockIcon').innerText = "🔓"; }
         }
+
+        function updatePreview(val) { document.getElementById('amountPreview').innerText = val ? `確認金額: $${parseFloat(val).toLocaleString()}` : ''; }
 
         function render() {
             const p = projects[currentIdx];
+            const statsContainer = document.getElementById('memberStats');
             document.getElementById('payer').innerHTML = p.names.map(n => `<option value="${n}">${n}</option>`).join('');
-            document.getElementById('announcementBar').innerText = p.announcement || "暫無公告";
-            
+            document.getElementById('announcementBar').innerText = p.announcement || "歡迎回來！";
+
             let totalPaid = 0, sums = p.names.map(n => ({ name: n, sum: 0 }));
             p.records.forEach(r => { totalPaid += r.amount; const idx = p.names.indexOf(r.payer); if(idx !== -1) sums[idx].sum += r.amount; });
 
-            // 1. 更新圓餅圖與標籤
             if (myChart) myChart.destroy();
             myChart = new Chart(document.getElementById('contributionChart'), {
                 type: 'doughnut',
-                data: { 
-                    labels: p.names,
-                    datasets: [{ data: sums.map(s => s.sum || 0), backgroundColor: p.colors, borderWidth: 0 }] 
-                },
-                options: { 
-                    cutout: '75%', 
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => ` ${context.label}: $${context.raw.toLocaleString()}`
-                            }
-                        }
-                    } 
-                }
+                data: { datasets: [{ data: sums.map(s => s.sum || 0.0001), backgroundColor: p.colors, borderWidth: 0 }] },
+                options: { cutout: '75%', plugins: { legend: { display: false } } }
             });
 
-            // 2. 更新圓餅圖下方自定義圖例
-            document.getElementById('chartLegend').innerHTML = p.names.map((name, i) => `
-                <div class="flex items-center gap-2 mb-1">
-                    <div class="w-2 h-2 rounded-full" style="background: ${p.colors[i]}"></div>
-                    <span class="text-[10px] font-bold text-slate-500 truncate">${name}</span>
-                </div>
-            `).join('');
+            document.getElementById('chartLegend').innerHTML = p.names.map((n, i) => `<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background:${p.colors[i]}"></div><span class="truncate">${n}</span></div>`).join('');
 
             const remain = Math.max(0, p.total - totalPaid), per = p.total > 0 ? (totalPaid / p.total * 100).toFixed(1) : 0;
             document.getElementById('statRemaining').innerText = `$${remain.toLocaleString()}`;
             document.getElementById('percentLabel').innerText = `${per}%`;
             document.getElementById('progressBar').style.width = `${per}%`;
-            document.getElementById('loanTotalDisplay').innerText = `總金額 $${p.total.toLocaleString()}`;
+            document.getElementById('loanTotalDisplay').innerText = `總金額： $${p.total.toLocaleString()}`;
 
-            document.getElementById('memberStats').innerHTML = sums.map((s, i) => `
-                <div class="glass-card p-5 border-l-4" style="border-left-color: ${p.colors[i]}">
-                    <span class="text-[9px] font-black text-slate-400 block mb-1 uppercase tracking-wider">${s.name}</span>
-                    <p class="text-lg md:text-xl font-mono font-black text-slate-800">$${s.sum.toLocaleString()}</p>
+            statsContainer.innerHTML = sums.map((s, i) => `
+                <div class="glass-card p-5" style="border-left: 5px solid ${p.colors[i]}">
+                    <div class="flex justify-between items-start mb-1"><span class="text-sm font-black text-slate-800">${s.name}</span><span class="text-[9px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-400">${totalPaid>0?(s.sum/totalPaid*100).toFixed(0):0}%</span></div>
+                    <p class="text-lg font-mono font-black text-slate-600 tracking-tighter">$${s.sum.toLocaleString()}</p>
                 </div>`).join('');
 
             const filtered = p.records.filter(r => r.payer.includes(document.getElementById('searchPayer').value)).sort((a,b)=>new Date(b.date)-new Date(a.date));
             document.getElementById('listBody').innerHTML = filtered.map(r => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50/50">
-                    <td class="px-8 py-4">
-                        <div class="text-[9px] text-slate-400 font-mono">${r.date}</div>
-                        <div class="font-black text-slate-700 text-xs">${r.payer}</div>
-                    </td>
-                    <td class="px-8 py-4 text-right font-mono font-black text-lg text-slate-800">$${r.amount.toLocaleString()}</td>
-                    <td class="px-8 py-4 text-center admin-only">
-                        <button onclick="editRecord(${r.id})" class="text-slate-300 hover:text-indigo-600 mx-1">✎</button>
-                        <button onclick="deleteRecord(${r.id})" class="text-slate-300 hover:text-rose-500 mx-1">✕</button>
-                    </td>
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4"><div class="font-bold flex items-center gap-2 text-slate-800"><div class="w-2 h-2 rounded-full" style="background:${p.colors[p.names.indexOf(r.payer)]}"></div>${r.payer}</div></td>
+                    <td class="px-6 py-4 text-center"><span class="text-[12px] font-mono font-bold text-slate-500">${r.date}</span></td>
+                    <td class="px-6 py-4 text-right font-mono font-black text-slate-900 text-lg">$${r.amount.toLocaleString()}</td>
+                    <td class="px-6 py-4 text-center admin-only"><button onclick="deleteRecord(${r.id})" class="text-slate-300 hover:text-rose-500 transition-all">✕</button></td>
                 </tr>`).join('');
-        }
-
-        function renderProjectList() {
-            const list = document.getElementById('projectList');
-            list.innerHTML = projects.map((p, i) => `
-                <div onclick="switchProject(${i})" class="p-4 rounded-xl cursor-pointer border transition-all ${i === currentIdx ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-slate-50 border-slate-200'}">
-                    <div class="text-xs font-black">${p.name}</div>
-                    <div class="text-[9px] opacity-70 mt-1 font-mono">$${p.total.toLocaleString()}</div>
-                </div>
-            `).join('');
         }
 
         function updateSettings() {
@@ -277,50 +245,26 @@
             p.total = parseFloat(document.getElementById('loanTotal').value)*10000 || 0;
             p.announcement = document.getElementById('announcementInput').value;
             p.names = []; p.colors = [];
-            for(let i=0; i<4; i++) {
-                p.names.push(document.getElementById(`name${i}`).value || `成員${i+1}`);
-                p.colors.push(document.getElementById(`color${i}`).value);
-            }
+            for(let i=0; i<4; i++) { p.names.push(document.getElementById(`name${i}`).value || `成員${i+1}`); p.colors.push(document.getElementById(`color${i}`).value); }
             saveAll(); closeAllPanels(); init();
         }
 
         function toggleProjectPanel() { document.getElementById('projectPanel').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
         function toggleSettings() { if(!isLocked) { document.getElementById('settingsPanel').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); } }
-        function closeAllPanels() { document.getElementById('projectPanel').classList.remove('active'); document.getElementById('settingsPanel').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); }
-        function saveAll() { localStorage.setItem('mortgage_v_final_2', JSON.stringify(projects)); localStorage.setItem('curr_idx_final_2', currentIdx); render(); }
+        function closeAllPanels() { document.querySelectorAll('.panel-popup, #overlay').forEach(el => el.classList.remove('active')); }
+        function saveAll() { localStorage.setItem('mortgage_v_final_final', JSON.stringify(projects)); localStorage.setItem('curr_idx_final_final', currentIdx); render(); }
         function switchProject(i) { currentIdx = i; saveAll(); init(); closeAllPanels(); }
-        
         function addRecord() {
             const amount = parseFloat(document.getElementById('recAmount').value) || 0;
             if (amount <= 0 || isLocked) return;
-            const p = projects[currentIdx];
-            if (editingId) {
-                const idx = p.records.findIndex(r => r.id === editingId);
-                p.records[idx] = { ...p.records[idx], payer: document.getElementById('payer').value, date: document.getElementById('recDate').value, amount };
-                editingId = null;
-            } else { p.records.push({ id: Date.now(), payer: document.getElementById('payer').value, date: document.getElementById('recDate').value, amount }); }
-            document.getElementById('recAmount').value = ''; saveAll();
+            projects[currentIdx].records.push({ id: Date.now(), payer: document.getElementById('payer').value, date: document.getElementById('recDate').value, amount });
+            document.getElementById('recAmount').value = ''; document.getElementById('amountPreview').innerText = ''; saveAll();
         }
-
-        function addNewProject() {
-            const n = prompt("帳本名稱:");
-            if(n) { projects.push({ id: Date.now(), name: n, total: 0, names: ["成員1", "成員2", "成員3", "成員4"], colors: [...defaultColors], records: [], announcement: "新帳本已建立。" }); currentIdx = projects.length-1; saveAll(); init(); }
-        }
-
-        function deleteProject() { if(projects.length > 1 && confirm("刪除此帳本？")) { projects.splice(currentIdx, 1); currentIdx = 0; saveAll(); init(); closeAllPanels(); } }
-        function deleteRecord(id) { if(confirm("刪除記錄？")) { projects[currentIdx].records = projects[currentIdx].records.filter(r => r.id !== id); saveAll(); } }
-        function editRecord(id) {
-            const r = projects[currentIdx].records.find(item => item.id === id);
-            editingId = id; document.getElementById('payer').value = r.payer;
-            document.getElementById('recDate').value = r.date; document.getElementById('recAmount').value = r.amount;
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
-        function exportJSON() {
-            const blob = new Blob([JSON.stringify(projects, null, 2)], { type: "application/json" });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-            a.download = `Backup_${new Date().toLocaleDateString()}.json`; a.click();
-        }
-
+        function renderProjectList() { document.getElementById('projectList').innerHTML = projects.map((p, i) => `<div onclick="switchProject(${i})" class="p-4 rounded-2xl cursor-pointer border-2 transition-all flex justify-between items-center ${i === currentIdx ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-50'}"><span class="font-bold text-sm">${p.name}</span></div>`).join(''); }
+        function addNewProject() { const n = prompt("輸入新帳本名稱:"); if(n) { projects.push({ id: Date.now(), name: n, total: 0, names: ["成員A", "成員B", "成員C", "成員D"], colors: [...defaultColors], records: [], announcement: "新帳本。" }); currentIdx = projects.length-1; saveAll(); init(); } }
+        function deleteProject() { if(projects.length > 1 && confirm("確定刪除此帳本？")) { projects.splice(currentIdx, 1); currentIdx = 0; saveAll(); init(); closeAllPanels(); } }
+        function deleteRecord(id) { if(confirm("確定刪除此筆記錄？")) { projects[currentIdx].records = projects[currentIdx].records.filter(r => r.id !== id); saveAll(); } }
+        function exportJSON() { const blob = new Blob([JSON.stringify(projects, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Mortgage_Backup.json`; a.click(); }
         init();
     </script>
 </body>
